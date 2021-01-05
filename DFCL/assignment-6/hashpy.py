@@ -7,10 +7,11 @@ from hashlib import sha3_512
 from tabulate import tabulate
 
 # instead of using memory equals to the file size,
-# we will read 64kb chunk at a time and calculate the hash
-BUF_SIZE = 65536 # 64kb
+# we will read 100MB chunk at a time and calculate the hash
+BUF_SIZE = 104857600 # 100MB
 
-sha3 = sha3_512()
+def get_sha_obj():
+    return sha3_512()
 
 def calc_file_hash(filename: str) -> str:
     '''
@@ -19,6 +20,7 @@ def calc_file_hash(filename: str) -> str:
     '''
     try:
         with open(filename, 'rb') as f:
+            sha3 = get_sha_obj()
             while True:
                 data = f.read(BUF_SIZE) # reading next 64kb of file
                 if not data:
@@ -26,7 +28,7 @@ def calc_file_hash(filename: str) -> str:
                 sha3.update(data)
         return sha3.hexdigest()
     except FileNotFoundError:
-        sys.exit(f'{sys.argv[1]} : file not found. exiting...\n')
+        sys.exit(f'{filename} : file not found. exiting...')
 
 if len(sys.argv) == 2:
     if sys.argv[1] == '--check':
@@ -51,9 +53,8 @@ if len(sys.argv) == 2:
                         )
                     )
                 )
-                
         except FileNotFoundError:
-            sys.exit(f'sha3sum : file not found. exiting...\n')
+            sys.exit(f'sha3sum : file not found. exiting...')
     else:
         filename = sys.argv[1]
         hash_value = calc_file_hash(filename)
